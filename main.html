@@ -8,7 +8,7 @@
             <script>
                     let main =()=>{
                         document.getElementById("main_div").style.width="100%";
-                        document.getElementById("main_div").style.height="90%";
+                        document.getElementById("main_div").style.height="100%";
                         document.getElementById("main_div").style.zIndex="1000";
 
                         document.getElementById("myDiagramDiv").style.width="0%";
@@ -19,9 +19,6 @@
                         document.getElementById("passage").style.height="0%";
                         document.getElementById("passage").style.visibility= "hidden";
 
-                        document.getElementById("lancer").style.visibility= "visible";
-                        document.getElementById("node_passed").style.visibility= "visible";
-
 
 
                     var cy = cytoscape({
@@ -31,7 +28,7 @@
                     {
                         selector: 'node',
                         style: {
-                        'background-color': '#ed3330',
+                        'background-color': '#b8d2d4',
                         'label': 'data(id)'
                         }
                     },
@@ -40,8 +37,8 @@
                         selector: 'edge',
                         style: {
                         'width': 3,
-                        'line-color': '#ed3330',
-                        'target-arrow-color': '#ed3330',
+                        'line-color': '#b8d2d4',
+                        'target-arrow-color': '#b8d2d4',
                         'target-arrow-shape': 'triangle'
                         }
                     },
@@ -50,6 +47,24 @@
                                 'background-color': '#b8d2d4',
                                 'line-color': '#b8d2d4',
                                 'target-arrow-color': '#b8d2d4',
+                                'transition-property': 'background-color, line-color, target-arrow-color',
+                                'transition-duration': '0.5s'
+                         }
+                    },
+                    {selector:'.highlighted_F',
+                        style:{
+                                'background-color': '#D92121',
+                                'line-color': '#D92121',
+                                'target-arrow-color': '#D92121',
+                                'transition-property': 'background-color, line-color, target-arrow-color',
+                                'transition-duration': '0.5s'
+                         }
+                    },
+                    {selector:'.highlighted_V',
+                        style:{
+                                'background-color': 'green',
+                                'line-color': 'green',
+                                'target-arrow-color': 'green',
                                 'transition-property': 'background-color, line-color, target-arrow-color',
                                 'transition-duration': '0.5s'
                          }
@@ -68,13 +83,6 @@
                       cy.add({group:'edges',data:{source:s,target:d}});  
                     });
                                    
-                    cy.layout({name:'cose'}).run();
-                    var node ="node";
-                    
-                        node=cy.nodes();
-                        edge=cy.edges();
-    
-                        cy.layout({name:'cose'}).run();
     
                         const GET_NODES=()=>{
                             
@@ -95,21 +103,26 @@
                             };
                             return Edges;
                         }
-               console.log(GET_NODES()[0]);
-                var dfs=cy.elements().dfs("#"+GET_NODES()[0], function(){}, true);
-                var i = 0;
-                // animation code 
-                var highlightNextEle = function(){
-                    if( i < dfs.path.length ){
-                        dfs.path[i].addClass('highlighted');
-    
-                        i++;
-                        setTimeout(highlightNextEle, 500);
-                    }
-                };
-                highlightNextEle();
-                //animation ends
-  
+                       
+                var Runn = function(){
+
+                  const GET_NODES=()=>{
+                            
+                    node=cy.nodes();
+                    var Nodes=[node.length];
+                    for (i=0;i<node.length;i++)  Nodes[i]=node[i].id();
+                    return Nodes;
+                 }
+                 node_array =GET_NODES();
+                 node_array.forEach(element => {
+                      bool = test(element);
+                      elem=cy.getElementById(element);
+                      if(bool=="1") { elem.addClass('highlighted_V');
+                      }else elem.addClass('highlighted_F');
+                    });
+                    cy.layout({name:'cose'}).run();
+                 }
+                Runn();
             }
     
     
@@ -164,7 +177,7 @@
       function load() {
         myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").value);
       }
-      function test() {
+      function test(parametre) {
                         const GET_NODEs=()=>{
                             
                             node=cy_plus.nodes();
@@ -173,7 +186,7 @@
                             return Nodes;
                         }
                     var cy_plus = cytoscape({
-                    container: document.getElementById('main_div'), // container to render in
+                    container: document.getElementById('myDiagramDiv'), // container to render in
     
                     style: [ // the stylesheet for the graph
                     {
@@ -210,13 +223,23 @@
                                 'transition-property': 'background-color, line-color, target-arrow-color',
                                 'transition-duration': '0.5s'
                          }
+                    },
+                    {selector:'.highlighted_V',
+                        style:{
+                                'background-color': 'green',
+                                'line-color': 'green',
+                                'target-arrow-color': 'green',
+                                'transition-property': 'background-color, line-color, target-arrow-color',
+                                'transition-duration': '0.5s'
+                         }
                     }
                     ]
                     })
                     input = JSON.parse(myDiagram.model.toJson());
                     arrayN=input.nodeDataArray; 
                     arrayE=input.linkDataArray;
-                    let no_node = document.getElementById("node_passed").value;
+                    let no_node = parametre;
+//
                     arrayN.forEach(element => {
                       if (element["text"] !== no_node) cy_plus.add({group:'nodes',data:{id:element["text"]}}); 
                     });
@@ -224,42 +247,23 @@
                       let s = arrayN.find(function(elem) { return elem['key']== element['from']; }).text; 
                       let d = arrayN.find(function(elem) { return elem['key']== element['to']; }).text; 
                       if (s != no_node && d!==no_node ) cy_plus.add({group:'edges',data:{source:s,target:d}});  
-                    });
-                    cy_plus.layout({name:'cose'}).run();  
+                    }); 
 
-                      var dfs=cy_plus.elements().dfs("#"+GET_NODEs()[0], function(){}, true);
-                      var i = 0;
-                      var j=0;
-                      for (j=0;j<dfs.path.lenght;j++) console.log(dfs.path[j]);
+                      var dfs=cy_plus.elements().dfs("#"+GET_NODEs()[0], function(){}, false);
+                      
                       var q= Math.floor(dfs.path.length /2);
-                      // animation code 
-                      var highlightNextElem = function(){
-                          console.log(dfs.path);
-                          if( (i < dfs.path.length) && (q+1 == arrayN.length-1)){
-                              dfs.path[i].addClass('highlighted');
-                              i++;
-                              setTimeout(highlightNextElem, 500);
+                          console.log(q+1);
+                          console.log("////////");
+                          console.log(arrayN.length-1);
+                          if (q+1 == arrayN.length-1){
+                              return "1";
                           }else{
-                            dfs.path[i].addClass('highlighted_F');
-                              i++;
-                              setTimeout(highlightNextElem, 500);
+                            return "0";
                           }
-
-                      };
-                      highlightNextElem();
-                      //animation ends
-                      var result = function(){
-                        if((q+1 !== arrayN.length-1)){
-                        alert("le noeud "+no_node+" est un point d'articulation");
-                      }else 
-                      alert("le noeud "+no_node+" n'est pas un point d'articulation");
-                      main();
-                      };
-                      setTimeout(result,3000); // valeur approximative (doit etre changée si le graph est trés grand )
-                      
-                      
                       
                 }
+                
+                
             </script>  
         </head>
         
@@ -312,39 +316,13 @@
                 margin-top: 0px;
                 visibility: hidden;
               }
-              .button_2
-            {
-              width: 200px;
-              text-align: center;
-              
-              height:40px;              
-              color: #fff !important;
-              text-transform: uppercase;
-              text-decoration: none;
-              background: #ed3330;
-              padding: 10px;
-              border-radius: 5px;
-              display: inline-block;
-              border: none;
-              transition: all 0.1s ease 0s;
-              font-size: large;
-            }
-            .button_2:hover {
-              background: #434343;
-              letter-spacing: 1px;
-              -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-              -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-              box-shadow: 5px 40px -10px rgba(0,0,0,0.57);
-              transition: all 0.1s ease 0s;
-              }
+
         </style>
         
         <body onload="init()">  
         <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:90%"></div>
         <div id="main_div" style="border: solid 1px black; width:00%; height:0px"></div>
         <input id="passage" class="button" type="submit" value="Passer vers les tests des points"  onclick="main()"  />
-        <input type="text" id="node_passed"value="Entrer le noeud a tester" >
-        <input id="lancer"  class="button_2" type="submit" value="lancer le test"  onclick="test()" style="visibility: hidden" />
         <textarea id="mySavedModel" style="width:100%;height:0%;visibility: hidden;" onfocus="save()">
             { "class": "go.GraphLinksModel",
               "nodeDataArray": [ 
